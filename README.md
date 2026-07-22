@@ -21,6 +21,8 @@ V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
 - A method interface with a neutral full-grid raw-potential reference fit.
 - A deterministic, energy-blind QR-seeded greedy D-optimal-style subset fit,
   promoted as the explicitly provisional `doptimal180_candidate`.
+- A versioned evaluation specification whose tolerance, bands, and wall
+  thresholds are recorded in every run manifest.
 - Immutable run directories containing inputs, solver choices, coefficients,
   selected/unselected errors, wall guardrails, selected orientations,
   conditioning, and the \(V_{000}\) diagnostic.
@@ -28,6 +30,9 @@ V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
 - A structural YUMI template parser/writer that maps
   `(l1, 0, l2, L) <-> (l1, l2, L)`, writes omitted terms as `0.0`, and rejects
   NaN or infinity.
+- A reproducible 158--200 point design study, deterministic off-grid
+  model--model stress tests, coefficient/radial holdouts, and a frozen
+  48-orientation independent-ab-initio request.
 
 ## Deliberate scientific limits
 
@@ -46,7 +51,9 @@ V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
 
 See [`docs/basis_contract.md`](docs/basis_contract.md),
 [`docs/artifact_contract.md`](docs/artifact_contract.md), and
-[`docs/yumi_contract.md`](docs/yumi_contract.md) before comparing results.
+[`docs/evaluation_contract.md`](docs/evaluation_contract.md) before comparing
+results. The YUMI boundary is documented in
+[`docs/yumi_contract.md`](docs/yumi_contract.md).
 
 ## Setup
 
@@ -117,6 +124,67 @@ reconstructed-potential, and \(V_{000}\) differences.
 It also writes `summary.csv` and a short `summary.md` containing the worst
 finite-grid discrepancies and their radii.
 
+## Reproduce the evidence behind 180 points
+
+```bash
+co2-h2-pes design-study \
+  all_avcbs_uniform.dat \
+  outputs/local/doptimal_design_study_v1
+```
+
+This reproduces the complete 158--200 count sweep, every single substitution
+at 161/175/180/182 points, targeted label-free reoptimization, and the 36-rule
+criterion-sensitivity grid. The curated result is under
+`data/reference/doptimal_design_study_v1/`.
+
+## Stress the fitted surfaces away from the known grid
+
+```bash
+co2-h2-pes offgrid-compare \
+  outputs/local/full500_raw_reference \
+  outputs/local/doptimal180_candidate \
+  outputs/local/offgrid_full500-vs-doptimal180
+```
+
+These Sobol and local-minimum results are explicitly model--model diagnostics:
+there is no independent truth at those angles. The curated real-data artifact
+is under `data/reference/offgrid_diagnostics_v1/`.
+
+## Generate the frozen independent-validation request
+
+```bash
+co2-h2-pes validation-request \
+  outputs/local/full500_raw_reference \
+  outputs/local/doptimal180_candidate \
+  outputs/local/validation_request_v3
+```
+
+The authoritative coordinate files are versioned under
+`data/reference/validation_request_v3/`: 48 new orientations, 144 primary
+energies at 4.4/4.8/5.0 Bohr, and an optional 24-energy radial challenge at
+4.7/4.9 Bohr. Returned primary labels can be scored without changing the rule:
+
+```bash
+co2-h2-pes validation-score \
+  returned_primary_energies.csv \
+  outputs/local/full500_raw_reference \
+  outputs/local/doptimal180_candidate \
+  outputs/local/independent_validation_score
+```
+
+## Diagnose radial behavior
+
+```bash
+co2-h2-pes radial-diagnostics \
+  all_avcbs_uniform.dat \
+  outputs/local/full500_raw_reference \
+  outputs/local/doptimal180_candidate \
+  outputs/local/radial_diagnostics_v1
+```
+
+The cubic spline here is a leave-one-node-out diagnostic, not the production
+short/intermediate/long-range joining algorithm.
+
 ## Fill a supplied YUMI template
 
 ```bash
@@ -136,6 +204,7 @@ blocks or a larger maximum list still require group confirmation.
 - `src/co2_h2_pes/`: basis, methods, artifact pipeline, comparisons, and YUMI I/O.
 - `docs/decisions/`: durable records of project pivots and negative results.
 - `docs/methods/`: experimental design and status of each promoted method.
+- `docs/protocols/`: preregistered comparisons that await external inputs.
 - `notebooks/`: preserved exploratory provenance.
 - `data/reference/`: small versioned contracts, never private raw energies.
 - `outputs/reference/`: only group-approved, reviewable reference artifacts.

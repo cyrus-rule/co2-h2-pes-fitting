@@ -47,7 +47,11 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(manifest["input"]["rows"], 3 * orientation_count)
             self.assertEqual(manifest["basis"]["term_count"], 158)
             self.assertEqual(manifest["method"]["parameters"]["rcond"], None)
-            self.assertEqual(manifest["schema_version"], "1.1")
+            self.assertEqual(manifest["schema_version"], "1.2")
+            self.assertEqual(
+                manifest["evaluation_spec"]["id"],
+                "co2-h2-hybrid-1cm-1pct-wall-v1",
+            )
             self.assertEqual(
                 manifest["design_matrix"]["evaluation_shape"],
                 [orientation_count, 158],

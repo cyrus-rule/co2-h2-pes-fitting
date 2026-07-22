@@ -8,7 +8,7 @@ downstream benchmarking.
 
 | File | Role |
 |---|---|
-| `manifest.json` | Input identity, method, solver policy, basis, units, conditioning, validation, and environment |
+| `manifest.json` | Input identity, method, solver policy, basis, versioned evaluation rule, units, conditioning, validation, and environment |
 | `coefficients.csv` | One tuple-keyed row per `(method, R, l1, l2, L)` |
 | `metrics.csv` | Errors by radius, energy band, and full/selected/unselected evaluation subset |
 | `guardrail.csv` | Wall-opening diagnostics where the true potential is at least 5000 cm^-1 |
@@ -30,8 +30,8 @@ downstream benchmarking.
   for reduced-point methods.
 - Reduced-point metrics include the unselected complement. Errors on selected
   rows alone are training residuals, not evidence of reconstruction quality.
-- Hybrid normalized error uses
-  `abs(prediction - truth) / max(1 cm^-1, 0.01 * abs(truth))`.
+- Every run records the complete evaluation specification. The present default
+  is `co2-h2-hybrid-1cm-1pct-wall-v1`; thresholds may not live only in code.
 - The input is identified by SHA-256, byte count, row count, radii, and units.
 - The basis is identified by a versioned name and ordered-tuple hash.
 - Existing run directories are never overwritten.
@@ -45,6 +45,16 @@ change units, tuple conventions, metrics, or serialization.
 The promoted methods are `full500_raw_reference` and the provisional
 `doptimal180_candidate`. Future methods should use descriptive IDs such as
 `rohan_reduced_basis_v1`.
+
+## Other immutable research artifacts
+
+Run artifacts are not the only durable unit. Design studies, off-grid
+comparisons, radial diagnostics, validation requests, and returned-label scores
+also write atomic directories with a manifest, input hashes, method IDs,
+evaluation specification, parameters, and named output files. Their manifest
+must state the evidence type—for example, finite-grid reconstruction,
+model--model stress, or independent validation—so those categories cannot be
+silently conflated.
 
 ## Versioning and publication
 

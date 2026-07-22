@@ -1,0 +1,25 @@
+Request phase,Validation ID,Category,Selection detail,Theta_1,Theta_2,Phi,R
+Optional radial midpoint,V001,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,71.948981,36.71737,145.179469,4.7
+Optional radial midpoint,V001,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,71.948981,36.71737,145.179469,4.9
+Optional radial midpoint,V002,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,107.061699,174.749823,80.568893,4.7
+Optional radial midpoint,V002,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,107.061699,174.749823,80.568893,4.9
+Optional radial midpoint,V013,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,67.707816,113.838162,133.952857,4.7
+Optional radial midpoint,V013,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,67.707816,113.838162,133.952857,4.9
+Optional radial midpoint,V014,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,113.28072,75.538871,64.71606,4.7
+Optional radial midpoint,V014,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,113.28072,75.538871,64.71606,4.9
+Optional radial midpoint,V025,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,75.564456,43.96744,7.372709,4.7
+Optional radial midpoint,V025,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,75.564456,43.96744,7.372709,4.9
+Optional radial midpoint,V026,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,73.257353,135.639104,177.055854,4.7
+Optional radial midpoint,V026,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,73.257353,135.639104,177.055854,4.9
+Optional radial midpoint,V027,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,104.801653,127.131567,12.120343,4.7
+Optional radial midpoint,V027,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,104.801653,127.131567,12.120343,4.9
+Optional radial midpoint,V033,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",5.36491,174.762211,70.322471,4.7
+Optional radial midpoint,V033,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",5.36491,174.762211,70.322471,4.9
+Optional radial midpoint,V034,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",173.591357,177.529177,118.202982,4.7
+Optional radial midpoint,V034,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",173.591357,177.529177,118.202982,4.9
+Optional radial midpoint,V035,Stress: angular derivative,largest angular-gradient disagreement; source R=4.4,174.718395,4.606838,135.316734,4.7
+Optional radial midpoint,V035,Stress: angular derivative,largest angular-gradient disagreement; source R=4.4,174.718395,4.606838,135.316734,4.9
+Optional radial midpoint,V041,Stress: wall boundary,threshold crossing=True; nearest fitted-boundary distance=0.0192; source R=5.0,138.716282,35.064243,96.47893,4.7
+Optional radial midpoint,V041,Stress: wall boundary,threshold crossing=True; nearest fitted-boundary distance=0.0192; source R=5.0,138.716282,35.064243,96.47893,4.9
+Optional radial midpoint,V045,Stress: local extremum,low fitted-energy/local-minimum candidate; source R=5.0,90.0,89.999999,179.999998,4.7
+Optional radial midpoint,V045,Stress: local extremum,low fitted-energy/local-minimum candidate; source R=5.0,90.0,89.999999,179.999998,4.9

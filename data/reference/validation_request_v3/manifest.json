@@ -1,0 +1,84 @@
+{
+  "artifact_id": "co2-h2-independent-request-v3",
+  "basis_id": "co2-h2-candidate-158-v1",
+  "candidate_method": "doptimal180_candidate",
+  "candidate_manifest_sha256": "8f51a326af87350ce80316325aa432b2e2f1fefd040369b214604db3199e1b0c",
+  "code": {
+    "git_revision_at_invocation": "404b0ef955701d49caaa243aa37c94211d2b57d0",
+    "software": {
+      "matplotlib": "3.10.8",
+      "numpy": "2.3.5",
+      "pandas": "2.2.3",
+      "python": "3.12.13",
+      "scipy": "1.17.0",
+      "sympy": "1.14.0"
+    }
+  },
+  "counts": {
+    "complete_energies": 168,
+    "optional_radial_energies": 24,
+    "orientations": 48,
+    "primary_energies": 144
+  },
+  "created_utc": "2026-07-22T18:50:56.837000+00:00",
+  "decision_rule": {
+    "after_failure": "augment or reoptimize, then reserve a fresh secondary holdout",
+    "evaluation_spec": {
+      "absolute_tolerance_floor_cm1": 1.0,
+      "attractive_upper_cm1": 0.0,
+      "guardrail_dangerous_cm1": 1000.0,
+      "guardrail_definition": "V_true >= physical_ceiling_cm1; flag predictions below guardrail_warning_cm1 and guardrail_dangerous_cm1",
+      "guardrail_warning_cm1": 3000.0,
+      "hybrid_tolerance": "max(absolute_tolerance_floor_cm1, relative_tolerance_fraction * abs(V_true))",
+      "id": "co2-h2-hybrid-1cm-1pct-wall-v1",
+      "low_repulsive_upper_cm1": 1000.0,
+      "lower_wall_upper_cm1": 3000.0,
+      "physical_ceiling_cm1": 5000.0,
+      "relative_tolerance_fraction": 0.01
+    },
+    "shared_failure": "if both fits fail the same geometry, investigate basis or radial representation",
+    "strict_failure": "any V_true < physical_ceiling with normalized error > 1",
+    "wall_failure": "any V_true >= physical_ceiling reconstructed below guardrail warning"
+  },
+  "evidence_boundary": "coordinates use existing model diagnostics; requested energies are unknown",
+  "file_sha256": {
+    "complete": "52b1170ce2465e6c73398b6d121400e4b19a191b884e16461da0cf6f21559c0e",
+    "optional_radial": "b7954e18dc656a52894c1a6fcb1438695e1eea8e0e5f867b2d4e83bfc351d074",
+    "orientations": "2500c2230461dc62803aae2bbd69fc351a6ceb089f3db2bb1f113c94606c4715",
+    "primary": "b52034d68fcd91c5352e86db51ee6c0baf3b3c1319086bc3ac2ab1fb8c50aa43"
+  },
+  "files": {
+    "complete": "complete_ab_initio_request_168.csv",
+    "optional_radial": "optional_radial_energies_24.csv",
+    "orientations": "validation_orientations_48.csv",
+    "primary": "primary_validation_energies_144.csv"
+  },
+  "input_dataset_sha256": "a578f9f92cd6bf418da94f34aff8e6df54ff8f2036379665df132889d4d36096",
+  "parameters": {
+    "category_counts": {
+      "Distributional: coordinate-uniform": 12,
+      "Distributional: solid-angle": 12,
+      "Stress: angular derivative": 8,
+      "Stress: energy disagreement": 8,
+      "Stress: local extremum": 4,
+      "Stress: wall boundary": 4
+    },
+    "offgrid_diagnostic_id": "sobol-model-disagreement-v1",
+    "offgrid_sample_size_per_measure": 4096,
+    "offgrid_seed": 20260715,
+    "optional_radial_radii_bohr": [
+      4.7,
+      4.9
+    ],
+    "primary_radii_bohr": [
+      4.4,
+      4.8,
+      5.0
+    ],
+    "request_seed": 20260716
+  },
+  "reference_method": "full500_raw_reference",
+  "reference_manifest_sha256": "7696f28dd2d9a7317a01d1ea3cf030a84cd314e5947eb325af8860fe57eb436f",
+  "schema_version": "1.2",
+  "status": "frozen-before-independent-labels"
+}

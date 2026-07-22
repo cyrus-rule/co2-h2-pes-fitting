@@ -27,9 +27,16 @@ The method must:
 ## Consequences
 
 The full-500 and reduced-180 branches can now be compared coefficient by
-coefficient and as reconstructed surfaces. The code can also produce an exact
-orientation request for external calculation.
+coefficient and as reconstructed surfaces. `selected_orientations.csv` is an
+exact *training-design* request drawn from the existing 500-angle candidate
+grid. It is distinct from the new off-grid independent-validation request in
+`data/reference/validation_request_v3/`.
 
 No statement about a generally sufficient 180-point ab initio budget follows
 until independent off-grid energies are evaluated. The candidate basis and
 YUMI maximum-term semantics remain separate unresolved contracts.
+
+The subsequent `doptimal-count-robustness-v1` study records why 180 was chosen:
+161 is the first strict finite-grid pass but is fragile under substitutions,
+whereas 175--182 have substantially more headroom. The decision remains a
+planning choice, not a claim that 180 is uniquely optimal.
