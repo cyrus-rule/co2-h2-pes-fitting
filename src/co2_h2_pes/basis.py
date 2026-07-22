@@ -43,12 +43,15 @@ def normalized_associated_legendre(
     return normalization * lpmv(m, l, np.asarray(x, dtype=float))
 
 
-def generate_basis_indices() -> tuple[BasisIndex, ...]:
-    """Return the canonical 158 allowed ``(l1, l2, L)`` triplets.
+def generate_candidate_basis_v1() -> tuple[BasisIndex, ...]:
+    """Return the current candidate 158-term ``(l1, l2, L)`` universe.
 
     The bounds and high-order truncation reproduce the convention used by the
-    current research notebook. This is a representation contract; reduced-basis
-    fitting methods should select subsets from it rather than silently redefine it.
+    July 2026 research notebook. The published methodology does not fully list
+    its omitted high-order terms, so this basis is deliberately versioned and
+    labelled *candidate* until checked against a trusted production term list.
+    Reduced-basis methods should select subsets from this universe rather than
+    silently redefining it.
     """
 
     basis: list[BasisIndex] = []
@@ -62,7 +65,18 @@ def generate_basis_indices() -> tuple[BasisIndex, ...]:
     return tuple(basis)
 
 
-CANONICAL_BASIS = generate_basis_indices()
+BASIS_ID = "co2-h2-candidate-158-v1"
+CANDIDATE_BASIS_V1 = generate_candidate_basis_v1()
+
+# Compatibility aliases for the original notebook extraction. New code should
+# use the explicit versioned names above so provisional status is visible.
+CANONICAL_BASIS = CANDIDATE_BASIS_V1
+
+
+def generate_basis_indices() -> tuple[BasisIndex, ...]:
+    """Compatibility wrapper for :func:`generate_candidate_basis_v1`."""
+
+    return generate_candidate_basis_v1()
 
 
 def evaluate_angular_basis(
@@ -106,7 +120,7 @@ def build_design_matrix(
     theta1_rad: ArrayLike,
     theta2_rad: ArrayLike,
     phi_rad: ArrayLike,
-    basis: Iterable[BasisIndex] = CANONICAL_BASIS,
+    basis: Iterable[BasisIndex] = CANDIDATE_BASIS_V1,
 ) -> NDArray[np.float64]:
     """Construct the angular design matrix for vectorized orientations."""
 

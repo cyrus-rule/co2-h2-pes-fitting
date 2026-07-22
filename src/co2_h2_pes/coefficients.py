@@ -8,11 +8,11 @@ import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike, NDArray
 
-from .basis import BasisIndex, CANONICAL_BASIS
+from .basis import BasisIndex, CANDIDATE_BASIS_V1
 
 
 def basis_table(
-    basis: Iterable[BasisIndex] = CANONICAL_BASIS,
+    basis: Iterable[BasisIndex] = CANDIDATE_BASIS_V1,
 ) -> pd.DataFrame:
     """Return the basis order together with its scientific tuple identifiers."""
 
@@ -29,9 +29,9 @@ def coefficient_matrix_to_table(
     coefficient_matrix: ArrayLike,
     radial_values: Sequence[float],
     *,
-    basis: Iterable[BasisIndex] = CANONICAL_BASIS,
+    basis: Iterable[BasisIndex] = CANDIDATE_BASIS_V1,
 ) -> pd.DataFrame:
-    """Convert ``(basis, R)`` coefficients to canonical long-form rows."""
+    """Convert ``(basis, R)`` coefficients to versioned long-form rows."""
 
     basis = tuple(basis)
     radial_values = np.asarray(radial_values, dtype=float)
@@ -60,7 +60,7 @@ def coefficient_table_to_matrix(
     table: pd.DataFrame,
     radial_values: Sequence[float],
     *,
-    basis: Iterable[BasisIndex] = CANONICAL_BASIS,
+    basis: Iterable[BasisIndex] = CANDIDATE_BASIS_V1,
 ) -> NDArray[np.float64]:
     """Rebuild a coefficient matrix by tuple, independent of table row order."""
 
@@ -91,4 +91,3 @@ def coefficient_table_to_matrix(
     if not np.isfinite(reconstructed).all():
         raise ValueError("Reconstructed coefficients contain NaN or infinity.")
     return reconstructed
-

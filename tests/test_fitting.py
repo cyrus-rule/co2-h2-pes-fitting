@@ -5,7 +5,9 @@ import numpy as np
 from co2_h2_pes.fitting import (
     CURRENT_SWITCH_T1,
     CURRENT_SWITCH_T2,
+    DEFAULT_LSTSQ_RCOND,
     apply_current_switch,
+    apply_legacy_switch,
     fit_coefficients,
 )
 
@@ -23,6 +25,10 @@ class FittingTests(unittest.TestCase):
         np.testing.assert_array_equal(switched[:2], values[:2])
         self.assertTrue(np.isclose(switched[-1], cap))
         self.assertTrue(np.all(np.diff(switched) >= 0.0))
+        np.testing.assert_array_equal(switched, apply_legacy_switch(values))
+
+    def test_default_least_squares_policy_is_not_truncated_svd(self):
+        self.assertIsNone(DEFAULT_LSTSQ_RCOND)
 
     def test_least_squares_recovers_exact_coefficients(self):
         design = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])

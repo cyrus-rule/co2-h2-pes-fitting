@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "co2-h2-pes"
-version = "0.1.0"
-description = "Reproducible angular fitting tools for the CO2-H2 intermolecular PES"
+version = "0.2.0"
+description = "Benchmark and integration pipeline for CO2-H2 PES fitting"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -20,6 +20,9 @@ dependencies = [
 notebook = [
     "jupyterlab>=4",
 ]
+
+[project.scripts]
+co2-h2-pes = "co2_h2_pes.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 
 import numpy as np
 import pandas as pd
@@ -24,6 +25,8 @@ def load_ab_initio_data(
 
     if frame[list(DATA_COLUMNS)].isna().any().any():
         raise ValueError(f"{path} contains missing values.")
+    if not np.isfinite(frame[list(DATA_COLUMNS)].to_numpy(dtype=float)).all():
+        raise ValueError(f"{path} contains NaN or infinity.")
     if frame.duplicated(subset=["R", *ANGLE_COLUMNS]).any():
         raise ValueError(f"{path} contains duplicate radial/angular geometries.")
 
@@ -52,6 +55,35 @@ def load_ab_initio_data(
             raise ValueError("The angular orientation grid is not shared across R.")
 
     return frame
+
+
+def sha256_file(path: str | Path) -> str:
+    """Return a streaming SHA-256 fingerprint for a research input."""
+
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def radial_potential_matrix(
+    frame: pd.DataFrame,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return sorted radii and an ``(orientation, R)`` potential matrix."""
+
+    required = {"R", "V", "orientation_id"}
+    missing = required.difference(frame.columns)
+    if missing:
+        raise ValueError(f"Missing columns: {sorted(missing)}")
+    pivot = (
+        frame.pivot(index="orientation_id", columns="R", values="V")
+        .sort_index()
+        .sort_index(axis=1)
+    )
+    if pivot.isna().any().any():
+        raise ValueError("The radial/angular grid is incomplete.")
+    return pivot.columns.to_numpy(dtype=float), pivot.to_numpy(dtype=float)
 
 
 def reference_orientations(frame: pd.DataFrame) -> pd.DataFrame:

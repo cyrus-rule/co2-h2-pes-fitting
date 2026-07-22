@@ -1,0 +1,12 @@
+{
+  "filename": "all_avcbs_uniform.dat",
+  "sha256": "a578f9f92cd6bf418da94f34aff8e6df54ff8f2036379665df132889d4d36096",
+  "bytes": 990000,
+  "rows": 15000,
+  "radial_count": 30,
+  "orientations_per_radius": 500,
+  "shared_angular_grid": true,
+  "columns": ["R", "Theta_1", "Theta_2", "Phi", "V"],
+  "units": {"R": "Bohr", "angles": "degree", "V": "cm^-1"},
+  "distribution": "untracked pending research-group approval"
+}

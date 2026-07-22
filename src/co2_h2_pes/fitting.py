@@ -7,16 +7,21 @@ from numpy.typing import ArrayLike, NDArray
 
 CURRENT_SWITCH_T1 = 1000.0
 CURRENT_SWITCH_T2 = 5000.0
-DEFAULT_LSTSQ_RCOND = 1.0e-4
+DEFAULT_LSTSQ_RCOND = None
 
 
-def apply_current_switch(
+def apply_legacy_switch(
     potential: ArrayLike,
     *,
     lower_threshold: float = CURRENT_SWITCH_T1,
     upper_threshold: float = CURRENT_SWITCH_T2,
 ) -> NDArray[np.float64]:
-    """Apply the current smooth high-energy switching function."""
+    """Apply the legacy bounded high-energy target transformation.
+
+    The mapping is continuous but is not C1 at ``lower_threshold``. It is
+    retained to reproduce a negative-result experiment, not as a production
+    default.
+    """
 
     if upper_threshold <= lower_threshold:
         raise ValueError("upper_threshold must be greater than lower_threshold.")
@@ -45,13 +50,32 @@ def apply_current_switch(
     return switched
 
 
+def apply_current_switch(
+    potential: ArrayLike,
+    *,
+    lower_threshold: float = CURRENT_SWITCH_T1,
+    upper_threshold: float = CURRENT_SWITCH_T2,
+) -> NDArray[np.float64]:
+    """Compatibility alias for :func:`apply_legacy_switch`."""
+
+    return apply_legacy_switch(
+        potential,
+        lower_threshold=lower_threshold,
+        upper_threshold=upper_threshold,
+    )
+
+
 def fit_coefficients(
     design_matrix: ArrayLike,
     potential: ArrayLike,
     *,
     rcond: float | None = DEFAULT_LSTSQ_RCOND,
 ) -> tuple[NDArray[np.float64], int, NDArray[np.float64]]:
-    """Fit one or several potential columns by linear least squares."""
+    """Fit one or several potential columns by linear least squares.
+
+    ``rcond=None`` uses NumPy's neutral machine-precision rank threshold. Any
+    truncated-SVD policy must pass and record a numerical cutoff explicitly.
+    """
 
     design_matrix = np.asarray(design_matrix, dtype=float)
     potential = np.asarray(potential, dtype=float)

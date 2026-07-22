@@ -8,17 +8,18 @@ htmlcov/
 
 .venv/
 venv/
+.deps/
 
 # Local research inputs. Do not publish without group approval.
 /all_avcbs_uniform.dat
 /data/raw/
 
-# Reproducible generated artifacts.
+# Local scratch runs. Curated, group-approved references may be committed under
+# outputs/reference/; see outputs/README.md.
 /coefficient_exports/
-/outputs/
+/outputs/local/
 
 # Editor and OS files.
 .DS_Store
 .idea/
 .vscode/
-
