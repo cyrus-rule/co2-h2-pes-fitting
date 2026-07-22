@@ -43,12 +43,16 @@ class ComparisonTests(unittest.TestCase):
             output = compare_runs(root / "left", root / "right", root / "comparison")
             differences = pd.read_csv(output / "coefficient_differences.csv")
             potential = pd.read_csv(output / "potential_differences.csv")
+            summary = pd.read_csv(output / "summary.csv")
+            summary_markdown = (output / "summary.md").read_text()
 
         changed = differences.loc[differences["abs_delta"] > 0.0]
         self.assertEqual(len(changed), 1)
         self.assertEqual(tuple(changed.iloc[0][["l1", "l2", "L"]]), (0, 0, 0))
         expected = 2.0 / (4.0 * np.sqrt(np.pi))
         self.assertAlmostEqual(potential.iloc[0]["rmse_difference"], expected)
+        self.assertAlmostEqual(summary.iloc[0]["v000_delta"], expected)
+        self.assertIn("finite-grid differences", summary_markdown)
 
 
 if __name__ == "__main__":

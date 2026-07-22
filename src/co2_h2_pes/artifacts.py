@@ -13,7 +13,7 @@ from pathlib import Path
 
 from .basis import BasisIndex
 
-RUN_SCHEMA_VERSION = "1.0"
+RUN_SCHEMA_VERSION = "1.1"
 
 
 def basis_fingerprint(basis: Iterable[BasisIndex]) -> str:
