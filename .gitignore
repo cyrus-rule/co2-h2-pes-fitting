@@ -1,0 +1,24 @@
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+
+# Local research inputs. Do not publish without group approval.
+/all_avcbs_uniform.dat
+/data/raw/
+
+# Reproducible generated artifacts.
+/coefficient_exports/
+/outputs/
+
+# Editor and OS files.
+.DS_Store
+.idea/
+.vscode/
+
