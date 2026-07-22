@@ -1,0 +1,49 @@
+Validation ID,Category,Selection detail,Theta_1,Theta_2,Phi
+V001,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,71.948981,36.71737,145.179469
+V002,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,107.061699,174.749823,80.568893
+V003,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,172.314384,53.186918,122.641417
+V004,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,8.148389,95.17016,13.274406
+V005,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,25.029307,69.884512,57.81086
+V006,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,155.609924,123.33904,167.227216
+V007,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,123.951345,20.390337,35.283772
+V008,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,55.234424,146.211066,99.943694
+V009,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,63.713134,67.28432,25.547974
+V010,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,115.691836,103.659301,106.872961
+V011,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,141.580365,22.789909,47.899568
+V012,Distributional: coordinate-uniform,Fresh Sobol seed 20260716; label-free,39.190353,166.4416,174.331977
+V013,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,67.707816,113.838162,133.952857
+V014,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,113.28072,75.538871,64.71606
+V015,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,127.454874,165.013606,179.168262
+V016,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,51.461699,35.656171,18.61958
+V017,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,32.308259,123.738628,82.661219
+V018,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,149.440951,48.544113,101.840294
+V019,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,97.727886,96.735581,36.829125
+V020,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,81.408773,77.003008,147.144571
+V021,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,87.660706,147.03603,27.452303
+V022,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,93.205393,20.304555,137.38883
+V023,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,159.838346,106.146489,72.75746
+V024,Distributional: solid-angle,Fresh Sobol seed 20260716; label-free,17.310668,67.795257,91.558912
+V025,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,75.564456,43.96744,7.372709
+V026,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,73.257353,135.639104,177.055854
+V027,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,104.801653,127.131567,12.120343
+V028,Stress: energy disagreement,largest normalized 180-vs-500 disagreement; source R=4.4,72.403126,48.693389,6.753476
+V029,Stress: energy disagreement,"largest absolute 180-vs-500 disagreement; source R=4.4,4.8,5.0,5.8",179.391447,177.741922,62.495524
+V030,Stress: energy disagreement,"largest absolute 180-vs-500 disagreement; source R=4.4,4.8,5.0,5.8",0.692561,2.673854,176.785573
+V031,Stress: energy disagreement,"largest absolute 180-vs-500 disagreement; source R=4.4,4.8,5.0,5.8",0.379163,173.856798,62.727098
+V032,Stress: energy disagreement,"largest absolute 180-vs-500 disagreement; source R=4.4,4.8,5.0,5.8",1.314015,179.617125,98.220539
+V033,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",5.36491,174.762211,70.322471
+V034,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",173.591357,177.529177,118.202982
+V035,Stress: angular derivative,largest angular-gradient disagreement; source R=4.4,174.718395,4.606838,135.316734
+V036,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",174.156841,6.279066,7.718886
+V037,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",6.33913,1.738124,8.123331
+V038,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",5.790722,166.041227,110.572642
+V039,Stress: angular derivative,"largest angular-gradient disagreement; source R=4.4,4.8,5.0",173.897189,19.856757,64.314352
+V040,Stress: angular derivative,largest angular-gradient disagreement; source R=4.4,169.1055,148.6345,165.804933
+V041,Stress: wall boundary,threshold crossing=True; nearest fitted-boundary distance=0.0192; source R=5.0,138.716282,35.064243,96.47893
+V042,Stress: wall boundary,threshold crossing=True; nearest fitted-boundary distance=0.0338; source R=4.8,77.607264,19.040055,66.540391
+V043,Stress: wall boundary,threshold crossing=True; nearest fitted-boundary distance=0.0418; source R=5.0,138.034143,31.362914,9.269875
+V044,Stress: wall boundary,threshold crossing=True; nearest fitted-boundary distance=0.1652; source R=4.4,88.902217,125.078254,39.309083
+V045,Stress: local extremum,low fitted-energy/local-minimum candidate; source R=5.0,90.0,89.999999,179.999998
+V046,Stress: local extremum,low fitted-energy/local-minimum candidate; source R=5.0,91.567101,94.599067,175.006864
+V047,Stress: local extremum,low fitted-energy/local-minimum candidate; source R=5.0,88.746034,94.777225,6.178328
+V048,Stress: local extremum,low fitted-energy/local-minimum candidate; source R=5.0,88.053015,88.863062,6.975007

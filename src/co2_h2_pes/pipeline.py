@@ -27,6 +27,12 @@ from .data import (
     reference_orientations,
     sha256_file,
 )
+from .evaluation import (
+    DEFAULT_EVALUATION_SPEC,
+    EvaluationSpec,
+    energy_band_masks,
+    hybrid_tolerance,
+)
 from .methods import (
     AngularFitMethod,
     FullGridLeastSquares,
@@ -65,30 +71,23 @@ def _error_metrics(
     reference: np.ndarray,
     reconstructed: np.ndarray,
     selected_orientation_ids: np.ndarray,
+    evaluation_spec: EvaluationSpec = DEFAULT_EVALUATION_SPEC,
 ) -> pd.DataFrame:
     rows: list[dict[str, float | int | str]] = []
-    bands = (
-        ("all", lambda values: np.ones(values.shape, dtype=bool)),
-        ("attractive_V<0", lambda values: values < 0.0),
-        ("low_repulsive_0<=V<1000", lambda values: (values >= 0.0) & (values < 1000.0)),
-        ("lower_wall_1000<=V<3000", lambda values: (values >= 1000.0) & (values < 3000.0)),
-        ("upper_wall_3000<=V<5000", lambda values: (values >= 3000.0) & (values < 5000.0)),
-        ("guardrail_V>=5000", lambda values: values >= 5000.0),
-    )
     partitions = _evaluation_partitions(reference.shape[0], selected_orientation_ids)
     for column, radius in enumerate(radii):
         target = reference[:, column]
         residual = reconstructed[:, column] - target
         for subset_name, subset_mask in partitions:
-            for band_name, selector in bands:
-                mask = subset_mask & selector(target)
+            for band_name, band_mask in energy_band_masks(target, evaluation_spec):
+                mask = subset_mask & band_mask
                 if not mask.any():
                     continue
                 values = residual[mask]
                 absolute_error = np.abs(values)
                 reference_rms = float(np.sqrt(np.mean(target[mask] ** 2)))
                 rmse = float(np.sqrt(np.mean(values**2)))
-                tolerance = np.maximum(1.0, 0.01 * np.abs(target[mask]))
+                tolerance = hybrid_tolerance(target[mask], evaluation_spec)
                 normalized_error = absolute_error / tolerance
                 rows.append(
                     {
@@ -123,8 +122,9 @@ def _guardrail_metrics(
     reference: np.ndarray,
     reconstructed: np.ndarray,
     selected_orientation_ids: np.ndarray,
+    evaluation_spec: EvaluationSpec = DEFAULT_EVALUATION_SPEC,
 ) -> pd.DataFrame:
-    """Score pathological openings where the true wall exceeds 5000 cm^-1."""
+    """Score pathological openings in the versioned guardrail region."""
 
     rows: list[dict[str, float | int | str]] = []
     partitions = _evaluation_partitions(reference.shape[0], selected_orientation_ids)
@@ -132,7 +132,7 @@ def _guardrail_metrics(
         target = reference[:, column]
         prediction = reconstructed[:, column]
         for subset_name, subset_mask in partitions:
-            mask = subset_mask & (target >= 5000.0)
+            mask = subset_mask & (target >= evaluation_spec.physical_ceiling_cm1)
             if not mask.any():
                 continue
             values = prediction[mask]
@@ -145,10 +145,10 @@ def _guardrail_metrics(
                     "minimum_predicted_potential": float(np.min(values)),
                     "p05_predicted_potential": float(np.percentile(values, 5)),
                     "predicted_below_3000_percent": float(
-                        100.0 * np.mean(values < 3000.0)
+                        100.0 * np.mean(values < evaluation_spec.guardrail_warning_cm1)
                     ),
                     "predicted_below_1000_percent": float(
-                        100.0 * np.mean(values < 1000.0)
+                        100.0 * np.mean(values < evaluation_spec.guardrail_dangerous_cm1)
                     ),
                 }
             )
@@ -216,6 +216,7 @@ def run_fit(
     method: AngularFitMethod,
     *,
     expected_points_per_radius: int | None = 500,
+    evaluation_spec: EvaluationSpec = DEFAULT_EVALUATION_SPEC,
 ) -> Path:
     """Execute a method and atomically write its immutable run directory."""
 
@@ -275,6 +276,7 @@ def run_fit(
             potentials,
             reconstructed,
             result.selected_orientation_ids,
+            evaluation_spec,
         )
         metrics.to_csv(temporary / "metrics.csv", index=False, float_format="%.17g")
         guardrail = _guardrail_metrics(
@@ -282,6 +284,7 @@ def run_fit(
             potentials,
             reconstructed,
             result.selected_orientation_ids,
+            evaluation_spec,
         )
         guardrail.to_csv(
             temporary / "guardrail.csv",
@@ -358,6 +361,7 @@ def run_fit(
                 "ordered_tuple_sha256": basis_fingerprint(CANDIDATE_BASIS_V1),
                 "coefficient_units": "cm^-1",
             },
+            "evaluation_spec": evaluation_spec.to_manifest(),
             "design_matrix": {
                 "evaluation_shape": list(design.shape),
                 "evaluation_rank": evaluation_rank,
@@ -417,6 +421,7 @@ def run_full_grid_reference(
     *,
     rcond: float | None = None,
     expected_points_per_radius: int | None = 500,
+    evaluation_spec: EvaluationSpec = DEFAULT_EVALUATION_SPEC,
 ) -> Path:
     """Run the neutral raw-potential full-grid reference method."""
 
@@ -425,6 +430,7 @@ def run_full_grid_reference(
         output_directory,
         FullGridLeastSquares(rcond=rcond),
         expected_points_per_radius=expected_points_per_radius,
+        evaluation_spec=evaluation_spec,
     )
 
 
@@ -436,6 +442,7 @@ def run_doptimal_candidate(
     rcond: float | None = None,
     recompute_interval: int = 50,
     expected_points_per_radius: int | None = 500,
+    evaluation_spec: EvaluationSpec = DEFAULT_EVALUATION_SPEC,
 ) -> Path:
     """Run the deterministic energy-blind D-optimal-style candidate method."""
 
@@ -448,4 +455,5 @@ def run_doptimal_candidate(
             recompute_interval=recompute_interval,
         ),
         expected_points_per_radius=expected_points_per_radius,
+        evaluation_spec=evaluation_spec,
     )

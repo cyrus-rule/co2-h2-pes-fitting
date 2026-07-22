@@ -33,3 +33,8 @@ July 9 meeting, especially at the shortest radii.
 The selected orientation CSV is ordered by design position so another
 implementation can reproduce and compare the exact design rather than merely
 the unordered set.
+
+The numerical reason for using 180 rather than the fragile first-pass count of
+161 is recorded in [`../design_study.md`](../design_study.md) and the frozen
+`data/reference/doptimal_design_study_v1/` artifact. The count remains a
+planning decision inside a supported range, not an optimized scalar truth.
