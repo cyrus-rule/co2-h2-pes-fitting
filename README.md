@@ -19,8 +19,11 @@ V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
 - A versioned 158-term *candidate* angular basis and tuple-keyed coefficient
   interchange.
 - A method interface with a neutral full-grid raw-potential reference fit.
+- A deterministic, energy-blind QR-seeded greedy D-optimal-style subset fit,
+  promoted as the explicitly provisional `doptimal180_candidate`.
 - Immutable run directories containing inputs, solver choices, coefficients,
-  errors, selected orientations, conditioning, and the \(V_{000}\) diagnostic.
+  selected/unselected errors, wall guardrails, selected orientations,
+  conditioning, and the \(V_{000}\) diagnostic.
 - One-to-one comparison of any two standardized runs.
 - A structural YUMI template parser/writer that maps
   `(l1, 0, l2, L) <-> (l1, l2, L)`, writes omitted terms as `0.0`, and rejects
@@ -33,6 +36,9 @@ V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
   trusted production/YUMI term list.
 - `full500_raw_reference` is the reference within the supplied angular dataset,
   not an independently validated production PES.
+- `doptimal180_candidate` is evidence about reconstruction on the known
+  500-orientation candidate grid. It is not yet evidence that 180 new ab initio
+  orientations are sufficient away from that grid.
 - The radial short/intermediate/long-range join and the downstream
   pressure-broadening benchmark are not implemented yet.
 - The historical high-energy switch is preserved as a labelled negative-result
@@ -68,6 +74,7 @@ The run refuses to overwrite an existing directory. It writes:
 manifest.json
 coefficients.csv
 metrics.csv
+guardrail.csv
 evaluation_orientations.csv
 selected_orientations.csv
 v000.csv
@@ -75,8 +82,23 @@ v000.png
 ```
 
 `manifest.json` records the input SHA-256, basis version and hash, target,
-solver, explicit `rcond`, rank, singular values, condition number, units,
-software versions, and reconstruction round-trip check.
+solver, explicit `rcond`, separate evaluation- and fit-design shapes,
+conditioning, units, software versions, and reconstruction round-trip check.
+
+## Produce the reduced-sampling candidate
+
+```bash
+co2-h2-pes fit-doptimal \
+  all_avcbs_uniform.dat \
+  outputs/local/doptimal180_candidate \
+  --points 180
+```
+
+The orientation order is selected from the angular design matrix alone. The
+potential energies do not influence selection. The first 158 rows are a
+full-rank pivoted-QR seed; the remaining rows greedily maximize immediate
+information-determinant gain. See
+[`docs/methods/doptimal180_candidate.md`](docs/methods/doptimal180_candidate.md).
 
 ## Compare methods
 
@@ -92,6 +114,8 @@ co2-h2-pes compare \
 The comparison aligns by `(R, l1, l2, L)`, never by array position, evaluates
 both surfaces on the common full orientation grid, and reports coefficient,
 reconstructed-potential, and \(V_{000}\) differences.
+It also writes `summary.csv` and a short `summary.md` containing the worst
+finite-grid discrepancies and their radii.
 
 ## Fill a supplied YUMI template
 

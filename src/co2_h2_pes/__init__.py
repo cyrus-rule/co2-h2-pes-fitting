@@ -17,8 +17,13 @@ from .fitting import (
     fit_coefficients,
     fit_radial_coefficients,
 )
-from .methods import FullGridLeastSquares
-from .pipeline import run_full_grid_reference
+from .methods import (
+    FullGridLeastSquares,
+    QRGreedyDOptimalLeastSquares,
+    qr_seeded_greedy_d_optimal_order,
+    whiten_candidate_design,
+)
+from .pipeline import run_doptimal_candidate, run_full_grid_reference
 from .yumi import fill_yumi_template, parse_yumi_template
 
 __all__ = [
@@ -26,6 +31,7 @@ __all__ = [
     "BasisIndex",
     "CANDIDATE_BASIS_V1",
     "FullGridLeastSquares",
+    "QRGreedyDOptimalLeastSquares",
     "apply_current_switch",
     "apply_legacy_switch",
     "build_design_matrix",
@@ -39,7 +45,10 @@ __all__ = [
     "generate_basis_indices",
     "load_ab_initio_data",
     "parse_yumi_template",
+    "qr_seeded_greedy_d_optimal_order",
     "radial_potential_matrix",
     "reference_orientations",
+    "run_doptimal_candidate",
     "run_full_grid_reference",
+    "whiten_candidate_design",
 ]

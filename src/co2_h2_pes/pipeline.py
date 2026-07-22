@@ -27,52 +27,156 @@ from .data import (
     reference_orientations,
     sha256_file,
 )
-from .methods import AngularFitMethod, FullGridLeastSquares
+from .methods import (
+    AngularFitMethod,
+    FullGridLeastSquares,
+    QRGreedyDOptimalLeastSquares,
+)
+
+
+def _evaluation_partitions(
+    orientation_count: int,
+    selected_orientation_ids: np.ndarray,
+) -> tuple[tuple[str, np.ndarray], ...]:
+    """Build full, selected, and unselected masks for common-grid scoring."""
+
+    selected = np.asarray(selected_orientation_ids, dtype=int)
+    if selected.ndim != 1:
+        raise ValueError("Selected orientation IDs must be one-dimensional.")
+    if np.unique(selected).size != selected.size:
+        raise ValueError("Selected orientation IDs must be unique.")
+    if np.any(selected < 0) or np.any(selected >= orientation_count):
+        raise ValueError("Selected orientation ID is outside the evaluation grid.")
+
+    all_mask = np.ones(orientation_count, dtype=bool)
+    if selected.size == orientation_count:
+        return (("all", all_mask),)
+    selected_mask = np.zeros(orientation_count, dtype=bool)
+    selected_mask[selected] = True
+    return (
+        ("all", all_mask),
+        ("selected", selected_mask),
+        ("unselected", ~selected_mask),
+    )
 
 
 def _error_metrics(
     radii: np.ndarray,
     reference: np.ndarray,
     reconstructed: np.ndarray,
+    selected_orientation_ids: np.ndarray,
 ) -> pd.DataFrame:
     rows: list[dict[str, float | int | str]] = []
     bands = (
         ("all", lambda values: np.ones(values.shape, dtype=bool)),
-        ("V<=1000", lambda values: values <= 1000.0),
-        ("1000<V<=5000", lambda values: (values > 1000.0) & (values <= 5000.0)),
-        ("V>5000", lambda values: values > 5000.0),
+        ("attractive_V<0", lambda values: values < 0.0),
+        ("low_repulsive_0<=V<1000", lambda values: (values >= 0.0) & (values < 1000.0)),
+        ("lower_wall_1000<=V<3000", lambda values: (values >= 1000.0) & (values < 3000.0)),
+        ("upper_wall_3000<=V<5000", lambda values: (values >= 3000.0) & (values < 5000.0)),
+        ("guardrail_V>=5000", lambda values: values >= 5000.0),
     )
+    partitions = _evaluation_partitions(reference.shape[0], selected_orientation_ids)
     for column, radius in enumerate(radii):
         target = reference[:, column]
         residual = reconstructed[:, column] - target
-        for band_name, selector in bands:
-            mask = selector(target)
+        for subset_name, subset_mask in partitions:
+            for band_name, selector in bands:
+                mask = subset_mask & selector(target)
+                if not mask.any():
+                    continue
+                values = residual[mask]
+                absolute_error = np.abs(values)
+                reference_rms = float(np.sqrt(np.mean(target[mask] ** 2)))
+                rmse = float(np.sqrt(np.mean(values**2)))
+                tolerance = np.maximum(1.0, 0.01 * np.abs(target[mask]))
+                normalized_error = absolute_error / tolerance
+                rows.append(
+                    {
+                        "R": float(radius),
+                        "evaluation_subset": subset_name,
+                        "energy_band": band_name,
+                        "n_points": int(mask.sum()),
+                        "rmse": rmse,
+                        "mae": float(np.mean(absolute_error)),
+                        "median_abs_error": float(np.median(absolute_error)),
+                        "max_abs_error": float(np.max(absolute_error)),
+                        "reference_rms": reference_rms,
+                        "normalized_rmse": (
+                            rmse / reference_rms if reference_rms else 0.0
+                        ),
+                        "p95_hybrid_normalized_error": float(
+                            np.percentile(normalized_error, 95)
+                        ),
+                        "max_hybrid_normalized_error": float(
+                            np.max(normalized_error)
+                        ),
+                        "within_hybrid_tolerance_percent": float(
+                            100.0 * np.mean(normalized_error <= 1.0)
+                        ),
+                    }
+                )
+    return pd.DataFrame(rows)
+
+
+def _guardrail_metrics(
+    radii: np.ndarray,
+    reference: np.ndarray,
+    reconstructed: np.ndarray,
+    selected_orientation_ids: np.ndarray,
+) -> pd.DataFrame:
+    """Score pathological openings where the true wall exceeds 5000 cm^-1."""
+
+    rows: list[dict[str, float | int | str]] = []
+    partitions = _evaluation_partitions(reference.shape[0], selected_orientation_ids)
+    for column, radius in enumerate(radii):
+        target = reference[:, column]
+        prediction = reconstructed[:, column]
+        for subset_name, subset_mask in partitions:
+            mask = subset_mask & (target >= 5000.0)
             if not mask.any():
                 continue
-            values = residual[mask]
-            reference_rms = float(np.sqrt(np.mean(target[mask] ** 2)))
-            rmse = float(np.sqrt(np.mean(values**2)))
+            values = prediction[mask]
             rows.append(
                 {
                     "R": float(radius),
-                    "energy_band": band_name,
+                    "evaluation_subset": subset_name,
                     "n_points": int(mask.sum()),
-                    "rmse": rmse,
-                    "mae": float(np.mean(np.abs(values))),
-                    "median_abs_error": float(np.median(np.abs(values))),
-                    "max_abs_error": float(np.max(np.abs(values))),
-                    "reference_rms": reference_rms,
-                    "normalized_rmse": rmse / reference_rms if reference_rms else 0.0,
+                    "minimum_true_potential": float(np.min(target[mask])),
+                    "minimum_predicted_potential": float(np.min(values)),
+                    "p05_predicted_potential": float(np.percentile(values, 5)),
+                    "predicted_below_3000_percent": float(
+                        100.0 * np.mean(values < 3000.0)
+                    ),
+                    "predicted_below_1000_percent": float(
+                        100.0 * np.mean(values < 1000.0)
+                    ),
                 }
             )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(
+        rows,
+        columns=[
+            "R",
+            "evaluation_subset",
+            "n_points",
+            "minimum_true_potential",
+            "minimum_predicted_potential",
+            "p05_predicted_potential",
+            "predicted_below_3000_percent",
+            "predicted_below_1000_percent",
+        ],
+    )
 
 
 def _v000_table(radii: np.ndarray, coefficients: np.ndarray) -> pd.DataFrame:
     index = CANDIDATE_BASIS_V1.index((0, 0, 0))
     a000 = 1.0 / (4.0 * np.sqrt(np.pi))
     contribution = coefficients[index] * a000
-    derivative = np.gradient(contribution, radii, edge_order=2)
+    if radii.size >= 3:
+        derivative = np.gradient(contribution, radii, edge_order=2)
+    elif radii.size == 2:
+        derivative = np.gradient(contribution, radii, edge_order=1)
+    else:
+        derivative = np.full(contribution.shape, np.nan)
     return pd.DataFrame(
         {
             "R": radii,
@@ -135,6 +239,10 @@ def run_fit(
             raise ValueError("Method returned an incompatible coefficient matrix.")
         if not np.isfinite(result.coefficients).all():
             raise ValueError("Method returned NaN or infinite coefficients.")
+        _evaluation_partitions(
+            design.shape[0],
+            result.selected_orientation_ids,
+        )
 
         reconstructed = design @ result.coefficients
         coefficient_table = coefficient_matrix_to_table(
@@ -162,8 +270,24 @@ def run_fit(
                 f"{reload_delta} > {tolerance}."
             )
 
-        metrics = _error_metrics(radii, potentials, reconstructed)
+        metrics = _error_metrics(
+            radii,
+            potentials,
+            reconstructed,
+            result.selected_orientation_ids,
+        )
         metrics.to_csv(temporary / "metrics.csv", index=False, float_format="%.17g")
+        guardrail = _guardrail_metrics(
+            radii,
+            potentials,
+            reconstructed,
+            result.selected_orientation_ids,
+        )
+        guardrail.to_csv(
+            temporary / "guardrail.csv",
+            index=False,
+            float_format="%.17g",
+        )
 
         v000 = _v000_table(radii, result.coefficients)
         v000.to_csv(temporary / "v000.csv", index=False, float_format="%.17g")
@@ -171,7 +295,12 @@ def run_fit(
 
         selected = orientations.iloc[result.selected_orientation_ids][
             ["orientation_id", "Theta_1", "Theta_2", "Phi"]
-        ]
+        ].copy()
+        selected.insert(
+            0,
+            "design_position",
+            np.arange(1, len(selected) + 1, dtype=int),
+        )
         selected.to_csv(temporary / "selected_orientations.csv", index=False)
         orientations[["orientation_id", "Theta_1", "Theta_2", "Phi"]].to_csv(
             temporary / "evaluation_orientations.csv",
@@ -180,11 +309,24 @@ def run_fit(
 
         dataset_hash = sha256_file(data_path)
         last_v000 = float(v000.iloc[-1]["isotropic_contribution"])
+        evaluation_singular_values = np.linalg.svd(design, compute_uv=False)
+        evaluation_rank = int(np.linalg.matrix_rank(design))
+        evaluation_condition = (
+            float(evaluation_singular_values[0] / evaluation_singular_values[-1])
+            if evaluation_singular_values.size
+            and evaluation_singular_values[-1] > 0.0
+            else float("inf")
+        )
         warnings: list[str] = []
         if last_v000 >= 0.0:
             warnings.append(
                 "The isotropic contribution at the largest supplied R is not "
                 "attractive; inspect the ab initio offset and long-range replacement."
+            )
+        if result.rank < len(CANDIDATE_BASIS_V1):
+            warnings.append(
+                "The fit design is rank deficient for the candidate basis; "
+                "coefficient values are not uniquely identified."
             )
         manifest = {
             "schema_version": RUN_SCHEMA_VERSION,
@@ -217,15 +359,25 @@ def run_fit(
                 "coefficient_units": "cm^-1",
             },
             "design_matrix": {
-                "shape": list(design.shape),
-                "rank": result.rank,
-                "condition_number": (
+                "evaluation_shape": list(design.shape),
+                "evaluation_rank": evaluation_rank,
+                "evaluation_condition_number": (
+                    evaluation_condition
+                    if np.isfinite(evaluation_condition)
+                    else None
+                ),
+                "fit_shape": [
+                    int(result.selected_orientation_ids.size),
+                    int(design.shape[1]),
+                ],
+                "fit_rank": result.rank,
+                "fit_condition_number": (
                     result.condition_number
                     if np.isfinite(result.condition_number)
                     else None
                 ),
-                "largest_singular_value": float(result.singular_values[0]),
-                "smallest_singular_value": float(result.singular_values[-1]),
+                "fit_largest_singular_value": float(result.singular_values[0]),
+                "fit_smallest_singular_value": float(result.singular_values[-1]),
             },
             "validation": {
                 "coefficient_rows": int(len(coefficient_table)),
@@ -244,6 +396,7 @@ def run_fit(
             "files": {
                 "coefficients": "coefficients.csv",
                 "metrics": "metrics.csv",
+                "guardrail": "guardrail.csv",
                 "evaluation_orientations": "evaluation_orientations.csv",
                 "selected_orientations": "selected_orientations.csv",
                 "v000": "v000.csv",
@@ -271,5 +424,28 @@ def run_full_grid_reference(
         data_path,
         output_directory,
         FullGridLeastSquares(rcond=rcond),
+        expected_points_per_radius=expected_points_per_radius,
+    )
+
+
+def run_doptimal_candidate(
+    data_path: str | Path,
+    output_directory: str | Path,
+    *,
+    point_count: int = 180,
+    rcond: float | None = None,
+    recompute_interval: int = 50,
+    expected_points_per_radius: int | None = 500,
+) -> Path:
+    """Run the deterministic energy-blind D-optimal-style candidate method."""
+
+    return run_fit(
+        data_path,
+        output_directory,
+        QRGreedyDOptimalLeastSquares(
+            point_count=point_count,
+            rcond=rcond,
+            recompute_interval=recompute_interval,
+        ),
         expected_points_per_radius=expected_points_per_radius,
     )

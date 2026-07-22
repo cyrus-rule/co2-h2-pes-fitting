@@ -9,7 +9,7 @@ import pandas as pd
 
 from .comparison import compare_runs
 from .basis import CANDIDATE_BASIS_V1
-from .pipeline import run_full_grid_reference
+from .pipeline import run_doptimal_candidate, run_full_grid_reference
 from .yumi import fill_yumi_template, parse_yumi_template
 
 
@@ -25,6 +25,16 @@ def build_parser() -> argparse.ArgumentParser:
     fit.add_argument("data", type=Path)
     fit.add_argument("output", type=Path)
     fit.add_argument("--rcond", type=_rcond, default=None)
+
+    doptimal = commands.add_parser(
+        "fit-doptimal",
+        help="run the energy-blind QR + greedy D-optimal-style candidate fit",
+    )
+    doptimal.add_argument("data", type=Path)
+    doptimal.add_argument("output", type=Path)
+    doptimal.add_argument("--points", type=int, default=180)
+    doptimal.add_argument("--rcond", type=_rcond, default=None)
+    doptimal.add_argument("--recompute-interval", type=int, default=50)
 
     compare = commands.add_parser("compare", help="compare two run directories")
     compare.add_argument("left", type=Path)
@@ -45,6 +55,14 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "fit-full":
         result = run_full_grid_reference(args.data, args.output, rcond=args.rcond)
+    elif args.command == "fit-doptimal":
+        result = run_doptimal_candidate(
+            args.data,
+            args.output,
+            point_count=args.points,
+            rcond=args.rcond,
+            recompute_interval=args.recompute_interval,
+        )
     elif args.command == "compare":
         result = compare_runs(args.left, args.right, args.output)
     else:
