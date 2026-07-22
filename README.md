@@ -7,11 +7,11 @@ provenance records, not the source of scientific truth.
 
 The present model is
 
-\[
+$$
 V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
 \qquad \Omega=(\theta_1,\theta_2,\phi),
 \qquad q=(\ell_1,\ell_2,L).
-\]
+$$
 
 ## What works now
 
