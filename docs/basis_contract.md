@@ -1,40 +1,78 @@
-# Working angular-basis contract
+# Angular-basis contract: `co2-h2-candidate-158-v1`
 
-The fitting model is
+## Model and units
 
 \[
 V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
-\qquad
-\Omega=(\theta_1,\theta_2,\phi),
-\qquad
-q=(\ell_1,\ell_2,L).
+\qquad \Omega=(\theta_1,\theta_2,\phi),
+\qquad q=(\ell_1,\ell_2,L).
 \]
 
-Here, (R) is the center-of-mass separation and (Omega) specifies the relative molecular orientations. The (A_q) are coupled angular functions. At each tabulated (R), the present workflow estimates the coefficients (c_q(R)) through a linear least-squares problem.
+- `R`: center-of-mass separation in Bohr.
+- `theta1`, `theta2`, `phi`: input in degrees and converted to radians before
+  basis evaluation.
+- `V` and `c_q`: inverse centimetres.
+- `A_q`: dimensionless coupled angular function.
 
-## Canonical 158-term universe
+The associated Legendre functions use the Appendix C7 normalization implemented
+in `basis.normalized_associated_legendre`. SciPy's `lpmv` already includes the
+Condon–Shortley phase used by this implementation. For the isotropic term,
 
-The current implementation generates the fitting universe by applying all of the following rules:
+\[
+A_{000}=\frac{1}{4\sqrt{\pi}},
+\]
 
-1. (ell_1 \in \{0,2,4,\ldots,24\}).
-2. (ell_2 \in \{0,2,4,6\}).
-3. If (ell_1 \ge 22), then (ell_2=0).
-4. (|\ell_1-\ell_2|\le L\le\ell_1+\ell_2).
-5. (ell_1+\ell_2+L) is even.
+so both `c000` and the physical contribution `c000*A000` are exported.
 
-The even monomer indices encode the axis-reversal symmetry of the centrosymmetric linear monomers. The triangle range follows from angular-momentum coupling. The upper bounds and the extra high-order rule are numerical truncations, not fundamental symmetry statements.
+## Candidate 158-term universe
 
-This contract separates three choices that must not be conflated:
+The current code applies:
 
-- **Representation:** the canonical set of angular functions permitted in the comparison.
-- **Fitting method:** which of those functions a reduced method retains at a particular radius.
-- **Serialization:** the index order and subset required by a downstream file format.
+1. \(\ell_1\in\{0,2,\ldots,24\}\).
+2. \(\ell_2\in\{0,2,4,6\}\).
+3. If \(\ell_1\ge22\), then \(\ell_2=0\).
+4. \(|\ell_1-\ell_2|\le L\le\ell_1+\ell_2\).
+5. \(\ell_1+\ell_2+L\) is even.
 
-All coefficient exchange should use explicit `(l1, l2, L)` keys. A reduced method should export omitted members of the canonical universe explicitly as zero when a complete vector is required.
+This produces 158 unique tuples and a full-rank `500 x 158` matrix on the July
+2026 grid. The even monomer indices encode axis-reversal symmetry; the triangle
+and parity conditions come from angular coupling. The bounds and high-order
+omission are numerical truncations.
 
-## Index conventions under discussion
+The published methodology states that some permitted terms were omitted but
+does not list the entire omission set in prose. Therefore the repository calls
+this basis *candidate*, not canonical. The ordered golden table is
+`data/reference/co2_h2_candidate_158_v1.csv`. External validation must compare
+named tuples to a trusted production fixture and then create a new basis ID; it
+must not silently relabel this version.
 
-The current notebook uses `(l1, l2, L)`. Other code or file formats may permute or pad these indices. Any mapping to another convention must be written explicitly and tested before coefficient values are compared.
+## Representation is not method
 
-This document records the current implementation and remains subject to confirmation with the research group.
+- **Representation:** the agreed universe of physically permitted functions.
+- **Method:** the fitting or selection algorithm operating within that universe.
+- **Sampling:** the ab initio orientations supplied to the method.
+- **Serialization:** the tuple order and maximum set required downstream.
 
+A reduced method selects from the agreed universe and exports omitted required
+terms as exact zero. It does not generate a new first-`N` basis by ordering.
+
+## Index mappings
+
+| Context | Stored tuple |
+|---|---|
+| Repository interchange | `(l1, l2, L)` |
+| Rohan's July 2026 notebook | `(L, l1, l2)` |
+| Observed YUMI template | `(l1, 0, l2, L)` |
+
+All comparisons must map to `(l1, l2, L)` before joining values. Column position
+alone has no scientific meaning.
+
+## Promotion checklist
+
+Before declaring a production basis:
+
+1. Obtain the authoritative term list or unmasked production file.
+2. Compare exact tuple membership and order.
+3. Confirm representative `A_q(Omega)` values against an independent program.
+4. Record phase, monomer, index-order, and normalization conventions.
+5. Add the source fixture and its hash without replacing this version.
