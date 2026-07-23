@@ -2,11 +2,11 @@
 
 ## Model and units
 
-\[
+$$
 V(R,\Omega)=\sum_q c_q(R)A_q(\Omega),
 \qquad \Omega=(\theta_1,\theta_2,\phi),
 \qquad q=(\ell_1,\ell_2,L).
-\]
+$$
 
 - `R`: center-of-mass separation in Bohr.
 - `theta1`, `theta2`, `phi`: input in degrees and converted to radians before
@@ -18,9 +18,9 @@ The associated Legendre functions use the Appendix C7 normalization implemented
 in `basis.normalized_associated_legendre`. SciPy's `lpmv` already includes the
 Condon–Shortley phase used by this implementation. For the isotropic term,
 
-\[
+$$
 A_{000}=\frac{1}{4\sqrt{\pi}},
-\]
+$$
 
 so both `c000` and the physical contribution `c000*A000` are exported.
 
@@ -28,11 +28,11 @@ so both `c000` and the physical contribution `c000*A000` are exported.
 
 The current code applies:
 
-1. \(\ell_1\in\{0,2,\ldots,24\}\).
-2. \(\ell_2\in\{0,2,4,6\}\).
-3. If \(\ell_1\ge22\), then \(\ell_2=0\).
-4. \(|\ell_1-\ell_2|\le L\le\ell_1+\ell_2\).
-5. \(\ell_1+\ell_2+L\) is even.
+1. $\ell_1\in\{0,2,\ldots,24\}$.
+2. $\ell_2\in\{0,2,4,6\}$.
+3. If $\ell_1\ge22$, then $\ell_2=0$.
+4. $|\ell_1-\ell_2|\le L\le\ell_1+\ell_2$.
+5. $\ell_1+\ell_2+L$ is even.
 
 This produces 158 unique tuples and a full-rank `500 x 158` matrix on the July
 2026 grid. The even monomer indices encode axis-reversal symmetry; the triangle
